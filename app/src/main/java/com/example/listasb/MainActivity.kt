@@ -48,6 +48,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.listasb.ui.theme.ListasBTheme
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.POST
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -258,12 +266,11 @@ val api = retrofit.create(ApiService::class.java)
 
 @Composable
 fun LstProductosContent(navController: NavHostController, modifier: Modifier) {
-    data class Producto(val nombre: String, val precio: Double, val existencias: Int)
     val productos = remember {
-        mutableStateListOf(
-            Producto("Sponch Fresa", 23.0, 10),
-            Producto("Emperador Combinado", 22.0, 10),
-            Producto("Florentinas Cajeta", 20.0, 8)
+        mutableStateListOf<ModeloProducto>(
+            // ModeloProducto(1, "Sponch Fresa", 23.0, 10),
+            // ModeloProducto(2, "Emperador Combinado", 22.0, 10),
+            // ModeloProducto(3, "Florentinas Cajeta", 20.0, 8)
         )
     }
     // productos[2] = Producto("Florentinas Fresa", 20.0, 5)
