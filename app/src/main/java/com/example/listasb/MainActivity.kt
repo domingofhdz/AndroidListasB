@@ -357,7 +357,7 @@ fun LstProductosContent(navController: NavHostController, modifier: Modifier) {
 
         Button(
             onClick = {
-                productos.add(Producto("Canelitas", 21.0, 12))
+                // productos.add(Producto("Canelitas", 21.0, 12))
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black,
