@@ -1,6 +1,7 @@
 package com.example.listasb
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -153,7 +154,6 @@ fun LoginContent(navController: NavHostController, modifier: Modifier) {
 
         Button(
             onClick = {
-
                 scope.launch {
                     try {
                         api.agregarRegistro(dato1, dato2.toDouble(), dato3.toInt())
@@ -266,6 +266,14 @@ data class ModeloProducto(
 interface ApiService {
     @GET("servicio.php?productos")
     suspend fun productos(): List<ModeloProducto>
+
+    @POST("servicio.php?iniciarSesion")
+    @FormUrlEncoded
+    suspend fun iniciarSesion(
+        @Field("usuario") nombre: String,
+        @Field("contrasena") precio: String
+    ): Response<String>
+
     @POST("servicio.php?agregarProducto")
     @FormUrlEncoded
     suspend fun agregarProducto(
