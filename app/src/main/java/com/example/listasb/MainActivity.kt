@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,6 +94,8 @@ fun LoginContent(navController: NavHostController, modifier: Modifier) {
     var usuario: String by remember { mutableStateOf("") }
     var contrasena: String by remember { mutableStateOf("") }
 
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -150,8 +153,22 @@ fun LoginContent(navController: NavHostController, modifier: Modifier) {
 
         Button(
             onClick = {
-                Toast.makeText(context, "Usuario: ${usuario}", Toast.LENGTH_SHORT).show()
-                Toast.makeText(context, "Contraseña: ${contrasena}", Toast.LENGTH_SHORT).show()
+
+                scope.launch {
+                    try {
+                        api.agregarRegistro(dato1, dato2.toDouble(), dato3.toInt())
+                        Toast.makeText(context, "Registro agregado con éxito.", Toast.LENGTH_SHORT).show()
+                        // El código comentado sirve para cuando queramos leer respuestas de texto después de enviar información
+                        // Por supuesto hay que añadir el método a la apiService con el tipo de dato correspondiente
+                        // val respuesta : Response<String> = api.hacerOtraCosa(dato1, dato2.toDouble())
+                        // respuesta.body()
+                    }
+                    catch (e: Exception) {
+                        Log.e("API", "Error al agregar registro: ${e.message}")
+                    }
+                }
+
+                Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.align(Alignment.End)
         ) {
