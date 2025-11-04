@@ -269,15 +269,15 @@ data class ModeloProducto(
     val existencias: Int
 )
 interface ApiService {
-    @GET("servicio.php?productos")
-    suspend fun productos(): List<ModeloProducto>
-
     @POST("servicio.php?iniciarSesion")
     @FormUrlEncoded
     suspend fun iniciarSesion(
         @Field("usuario") nombre: String,
         @Field("contrasena") precio: String
     ): Response<String>
+
+    @GET("servicio.php?productos")
+    suspend fun productos(): List<ModeloProducto>
 
     @POST("servicio.php?agregarProducto")
     @FormUrlEncoded
@@ -288,7 +288,7 @@ interface ApiService {
     ): Response<Unit>
 }
 val retrofit = Retrofit.Builder()
-    .baseUrl("AQUI VA LA URL GENERADA POR EL COMANDO DE CLOUDFLARED TUNNELS")
+    .baseUrl("https://parameters-hardwood-durable-aerial.trycloudflare.com/api/")
     .addConverterFactory(ScalarsConverterFactory.create())
     .addConverterFactory(GsonConverterFactory.create())
     .build()
