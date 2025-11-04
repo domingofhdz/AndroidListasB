@@ -50,6 +50,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.listasb.ui.theme.ListasBTheme
+import kotlinx.coroutines.launch
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -156,19 +157,23 @@ fun LoginContent(navController: NavHostController, modifier: Modifier) {
             onClick = {
                 scope.launch {
                     try {
-                        api.agregarRegistro(dato1, dato2.toDouble(), dato3.toInt())
-                        Toast.makeText(context, "Registro agregado con éxito.", Toast.LENGTH_SHORT).show()
-                        // El código comentado sirve para cuando queramos leer respuestas de texto después de enviar información
-                        // Por supuesto hay que añadir el método a la apiService con el tipo de dato correspondiente
+                        val respuesta : Response<String> = api.iniciarSesion(usuario, contrasena)
+
+                        if (respuesta.body() == "correcto") {
+                            Toast.makeText(context, "Inicio de sesión con éxito.", Toast.LENGTH_SHORT).show()
+                            navController.navigate("menu")
+                        }
+                        else {
+                            Toast.makeText(context, "Inicio de sesión incorrecto.", Toast.LENGTH_SHORT).show()
+                        }
+
                         // val respuesta : Response<String> = api.hacerOtraCosa(dato1, dato2.toDouble())
                         // respuesta.body()
                     }
                     catch (e: Exception) {
-                        Log.e("API", "Error al agregar registro: ${e.message}")
+                        Log.e("API", "Error al intentar iniciar sesión: ${e.message}")
                     }
                 }
-
-                Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.align(Alignment.End)
         ) {
