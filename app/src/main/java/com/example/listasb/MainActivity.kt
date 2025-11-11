@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -85,7 +86,16 @@ interface ApiService {
         @Field("nombre") nombre: String,
         @Field("precio") precio: Double,
         @Field("existencias") existencias: Int
-    ): Response<Unit>
+    ): Response<String>
+
+    @POST("servicio.php?modificarProducto")
+    @FormUrlEncoded
+    suspend fun modificarProducto(
+        @Field("id") id: Int,
+        @Field("nombre") nombre: String,
+        @Field("precio") precio: Double,
+        @Field("existencias") existencias: Int
+    ): Response<String>
 
     @POST("servicio.php?eliminarProducto")
     @FormUrlEncoded
@@ -314,6 +324,12 @@ fun LstProductosContent(navController: NavHostController, modifier: Modifier) {
     }
     // productos[2] = Producto("Florentinas Fresa", 20.0, 5)
 
+    var index2: String by remember { mutableStateOf("") }
+    var id: String by remember { mutableStateOf("") }
+    var nombre: String by remember { mutableStateOf("") }
+    var precio: String by remember { mutableStateOf("") }
+    var existencias: String by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         try {
             val respuesta = api.productos()
@@ -353,6 +369,7 @@ fun LstProductosContent(navController: NavHostController, modifier: Modifier) {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
+        /**
         Button(
             onClick = {
                 navController.navigate("frmProductos")
@@ -391,12 +408,101 @@ fun LstProductosContent(navController: NavHostController, modifier: Modifier) {
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
+        */
+
+        Text(text = "Id:")
+        TextField(
+            value = id,
+            onValueChange = { id = it },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Nombre:")
+        TextField(
+            value = nombre,
+            onValueChange = { nombre = it },
+            placeholder = { Text("Ingresa el nombre") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Precio:")
+        TextField(
+            value = precio,
+            onValueChange = { precio = it },
+            placeholder = { Text("Ingresa el precio") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Existencias:")
+        TextField(
+            value = existencias,
+            onValueChange = { existencias = it },
+            placeholder = { Text("Ingresa las existencias") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+
+                scope.launch {
+                    try {
+                        var respuesta : Response<String>
+                        if (id == "") {
+                            respuesta = api.agregarProducto(nombre, precio.toDouble(), existencias.toInt())
+                            productos.add(ModeloProducto(respuesta.body()?.toInt() ?: 0, nombre, precio.toDouble(), existencias.toInt()))
+                            Toast.makeText(context, "Agregado de producto con éxito.", Toast.LENGTH_SHORT).show()
+                        }
+                        else {
+                            respuesta = api.modificarProducto(id.toInt(), nombre, precio.toDouble(), existencias.toInt())
+                            if (respuesta.body() == "correcto") {
+                                productos[index2.toInt()] = ModeloProducto(id.toInt(), nombre, precio.toDouble(), existencias.toInt())
+                                Toast.makeText(context, "Modificación de producto con éxito.", Toast.LENGTH_SHORT).show()
+                            }
+                            else {
+                                Toast.makeText(context, "Modificación de producto incorrecta.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        id          = ""
+                        nombre      = ""
+                        precio      = ""
+                        existencias = ""
+                    }
+                    catch (e: Exception) {
+                        Log.e("API", "Error al intentar agregar producto: ${e.message}")
+                    }
+                }
+
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Blue
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                "Enviar",
+                style = TextStyle(textDecoration = TextDecoration.Underline),
+                textAlign = TextAlign.Start,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
         Row {
             Text("Id", modifier = Modifier.width(150.dp), fontWeight = FontWeight.Bold)
             Text("Nombre", modifier = Modifier.width(150.dp), fontWeight = FontWeight.Bold)
             Text("Precio", modifier = Modifier.width(100.dp), fontWeight = FontWeight.Bold)
             Text("Existencias", modifier = Modifier.width(100.dp), fontWeight = FontWeight.Bold)
             Text("Eliminar", modifier = Modifier.width(100.dp), fontWeight = FontWeight.Bold)
+            Text("Modificar", modifier = Modifier.width(100.dp), fontWeight = FontWeight.Bold)
         }
         Divider()
         productos.forEachIndexed { index, producto ->
@@ -437,6 +543,15 @@ fun LstProductosContent(navController: NavHostController, modifier: Modifier) {
                     }
                 }) {
                     Text("Eliminar")
+                }
+                Button(onClick = {
+                    index2      = index.toString()
+                    id          = productos[index].id.toString()
+                    nombre      = productos[index].nombre
+                    precio      = productos[index].precio.toString()
+                    existencias = productos[index].existencias.toString()
+                }) {
+                    Text("Editar")
                 }
             }
         }
